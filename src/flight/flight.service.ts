@@ -31,7 +31,7 @@ export class FlightService {
   async findAll(): Promise<Flight[]> {
     const allF = await this.flightRep.find();
     if (allF.length === 0) {
-      throw new NotFoundException('Malumot mavjud emas');
+      throw new NotFoundException('Flight not found');
     }
     return allF;
   }
@@ -39,16 +39,14 @@ export class FlightService {
   async findOne(id: number): Promise<Flight> {
     const flight = await this.flightRep.findOneBy({ id });
     if (!flight) {
-      throw new NotFoundException('Bunday id raqm mavjud emas');
+      throw new NotFoundException('Flight not found');
     }
     return flight;
   }
 
   async update(id: number, dto: UpdateFlightDto) {
     const flight = await this.findOne(id);
-    if (!flight) {
-      throw new NotFoundException('bunday malumot yoq');
-    }
+    
     if (flight.flightNumber != dto.flightNumber) {
       const existing = await this.flightRep.findOne({
         where: { flightNumber: dto.flightNumber },
@@ -59,16 +57,16 @@ export class FlightService {
         );
       }
     }
-    await this.flightRep.update({ id }, dto);
-    return this.findOne(id);
+    
+    return await this.flightRep.save({id, ...dto})
   }
 
   async remove(id: number) {
     const flight = await this.findOne(id);
-    if (!flight) {
-      throw new NotFoundException('bunday malumot yoq');
-    }
+    
     await this.flightRep.remove(flight);
-    return { data: 'Malumot ochrildi' };
+    return { data: 'Flight deleted' };
   }
+
+  
 }
